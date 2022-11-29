@@ -14,6 +14,9 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  messages: {
+    type: Number,
+  }
 })
 
-module.exports = mongoose.model('type12users-full-project', userSchema)
+module.exports = mongoose.model('type12users-full-projects', userSchema)

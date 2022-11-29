@@ -6,6 +6,8 @@ const app = express()
 const mainRouter = require("./router/mainRouter")
 const mongoose = require("mongoose")
 const http = require('http').createServer(app);
+const session = require("express-session");
+
 
 const PORT = process.env.PORT || 5000
 
@@ -17,6 +19,14 @@ mongoose.connect(process.env.MONGO_KEY)
     }).catch((e) => {
         console.log("ERROR", e)
     })
+
+app.use(
+    session({
+        secret: "thisisverysecret",
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 
 app.use(express.json())
 app.use(
