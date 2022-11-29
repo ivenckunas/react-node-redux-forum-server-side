@@ -31,11 +31,10 @@ module.exports = {
         if (!userExists) return res.send({ error: true, message: 'user does not exist. Please register first', data: null });
         const comparedPsw = await bcrypt.compare(password, userExists.hashedPsw)
         if (comparedPsw) res.send({ error: false, message: 'logged in ok', data: userExists })
-        req.session.user = userExists.secret
+        req.session.user = email
     },
     authSession: (req, res) => {
         const { user } = req.session
-        res.send({ error: !(!!user) })
     },
     getAllTopics: async (req, res) => {
         const con = await client.connect();
@@ -48,10 +47,22 @@ module.exports = {
         res.send({ error: false, message: 'all topics downloaded successfully', data: data })
     },
     postNewDiscussion: async (req, res) => {
-        console.log('req.body ===', req.body);
-        const discussionId = req.body.topic
-        console.log('discussionId ===', discussionId);
-        const updatedBidHistory = await discussionSchema.findOneAndUpdate({ _id: req.body.topic }, { $push: { topics: { title: req.body.title, message: req.body.message } } });
-        res.send(updatedBidHistory)
+        const updatedDiscussions = await discussionSchema.findOneAndUpdate({ _id: req.body.topic }, { $push: { topics: { title: req.body.title, message: req.body.message, author: req.body.author } } });
+        res.send({ error: false, message: 'updated successfully', data: updatedDiscussions })
+        const updateMessageCount = await userSchema.findOneAndUpdate({ email: req.body.fullName }, { $inc: { messages: 1 } })
+
+    },
+    getUserProfile: async (req, res) => {
+        const userEmail = req.body.join("@");
+        const userProfile = await userSchema.find({ email: req.body.userEmail })
+        res.send({ error: false, message: 'user profile data', data: userProfile })
+    },
+    changeProfilePic: async (req, res) => {
+        const updatePicture = await userSchema.findOneAndUpdate({ email: req.body.userEmail }, { image: req.body.image })
+        res.send({ error: false, message: 'updated successfully', data: updatePicture })
+    },
+    getUsers: async (req, res) => {
+        const allUsers = await userSchema.find()
+        res.send({ error: false, message: 'updated successfully', data: allUsers })
     }
 }
